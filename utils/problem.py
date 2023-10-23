@@ -1,6 +1,6 @@
 import numpy as np
 from numba.experimental import jitclass
-from numba import int32, string
+from numba import int32
 
 
 
@@ -18,6 +18,8 @@ class BinaryKnapsackProblem:
         self.profits = self._load_array('p')
         self.weights = self._load_array('w')
         self.solution = self._load_array('s')
+
+        self.optimal_profit = np.sum(self.profits*self.solution)
 
     def _load_capacity(self):
         capacity_file = f'{self.problem_dir}/{self.name}_c.txt'
