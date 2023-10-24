@@ -1,6 +1,5 @@
 import numpy as np
-from numba.experimental import jitclass
-from numba import int32
+from numba import njit
 
 
 
@@ -45,8 +44,15 @@ class BinaryKnapsackProblem:
         return arr
 
 
-
-
+@njit
+def solutions_same(sol1: np.array, sol2: np.array):
+    assert len(sol1) == len(sol2)
+    
+    for i in range(len(sol1)):
+        if sol1[i] != sol2[i]:
+            return False
+        
+    return True
 
 
 
