@@ -3,7 +3,7 @@ from numba import njit, int32
 from numba.experimental import jitclass
 
 from numba.typed import List
-from utils import BinaryKnapsackProblem
+from utils import BinaryKnapsackProblem, solutions_same
 from utils import LoggerCSV
 
 
@@ -14,17 +14,13 @@ def run_ga(problem: BinaryKnapsackProblem, config, logger: LoggerCSV):
 
     population = init_population(config.population_size, len(item_profits))
 
-    while True:
-        # unflip so to not exceed the restraint
-        unflip_to_fit_restraint(population, item_weights, restraint)
-
-        # update fitness on all individuals
-        update_population_fitness(population, item_profits)
-
-        logger.update_cycle(population)
-        logger.print_cycle_stats()
-
-        print(np.max([individual.fitness for individual in population]))
+    # unflip so to not exceed the restraint
+    unflip_to_fit_restraint(population, item_weights, restraint)
+    # update fitness on all individuals
+    update_population_fitness(population, item_profits)
+    
+    while config.generations != logger.cycle_count and \
+        not solutions_same(logger.solution_of_best[len(logger.solution_of_best)-1], problem.solution):
 
         # select parent
         parents = select_parents_roulette_wheel(population)
@@ -38,6 +34,17 @@ def run_ga(problem: BinaryKnapsackProblem, config, logger: LoggerCSV):
 
         # gather entire population of parents and children
         population = concat_parents_children(parents, children)
+
+        # unflip so to not exceed the restraint
+        unflip_to_fit_restraint(population, item_weights, restraint)
+
+        # update fitness on all individuals
+        update_population_fitness(population, item_profits)
+
+        logger.update_cycle(population)
+        logger.print_cycle_stats()
+
+
 
     print([population[i].fitness for i in range(len(population))])
     print([individual.genome for individual in population])

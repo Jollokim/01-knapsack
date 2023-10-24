@@ -1,5 +1,6 @@
 from utils import BinaryKnapsackProblem, LoggerCSV
 from algorithms import run_ga
+from omegaconf import OmegaConf
 
 
 class DummyConfig:
@@ -10,8 +11,8 @@ class DummyConfig:
         self.n_cycles = 100
 
 def main():
-    problem_name = 'p01' 
-    problem_dir = 'data\p01'
+    problem_name = 'p08' 
+    problem_dir = 'data\p08'
 
     problem = BinaryKnapsackProblem(problem_name, problem_dir)
     print('Weights:')
@@ -25,11 +26,9 @@ def main():
     
     logger = LoggerCSV(problem)
 
-    config = DummyConfig()
+    config = OmegaConf.load('configs\ga.yaml')
     
-    print(config.population_size)
-
-    run_ga(problem, config)
+    run_ga(problem, config, logger)
 
 
 
