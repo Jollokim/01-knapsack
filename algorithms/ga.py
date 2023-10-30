@@ -12,25 +12,25 @@ def run_ga(problem: BinaryKnapsackProblem, config, logger: LoggerCSV):
     item_weights = problem.weights
     restraint = problem.capacity
 
-    population = init_population(config.population_size, len(item_profits))
+    population = init_population(config.ga.population_size, len(item_profits))
 
     # unflip so to not exceed the restraint
     unflip_to_fit_restraint(population, item_weights, restraint)
     # update fitness on all individuals
     update_population_fitness(population, item_profits)
     
-    while config.generations != logger.cycle_count and \
+    while config.ga.generations != logger.cycle_count and \
         not solutions_same(logger.solution_of_best[len(logger.solution_of_best)-1], problem.solution):
 
         # select parent
-        parents = select_parents_roulette_wheel(population)
+        parents = select_parents_roulette_wheel(population, elites=config.ga.elites)
         # print([parent.genome for parent in parents])
 
         # crossover to create children
         children = crossover_parents(parents)
 
         # mutate children
-        mutate_population(children, config.mutation_rate)
+        mutate_population(children, config.ga.mutation_rate)
 
         # gather entire population of parents and children
         population = concat_parents_children(parents, children)
@@ -128,14 +128,23 @@ def roulette_wheel_probabilities(population: list[Individual], population_fitnes
 
 
 # @njit
-def select_parents_roulette_wheel(population: list[Individual]) -> list[Individual]:
+def select_parents_roulette_wheel(population: list[Individual], elites: int=0) -> list[Individual]:
     population_fitness = total_population_fitness(population)
 
     probabilities = roulette_wheel_probabilities(
         population, population_fitness)
 
-    parents = np.random.choice(
-        population, size=len(population)//2, p=probabilities)
+    sel_parents = np.random.choice(
+        population, size=(len(population)//2)-elites, p=probabilities)
+    
+    best_fitness_idx = np.argmax([individual.fitness for individual in population])
+
+    parents = np.array([None for i in range(len(population)//2)], dtype=Individual)
+
+    parents[0] = population[best_fitness_idx]
+    parents[1:] = sel_parents
+    
+
 
     return parents
 
