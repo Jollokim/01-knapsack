@@ -1,19 +1,10 @@
-from utils import BinaryKnapsackProblem, LoggerCSV
+from utils import BinaryKnapsackProblem, LoggerCSV, plot_run
 from algorithms import run_ga
 from omegaconf import OmegaConf
 import os
 
 
-class DummyConfig:
-    def __init__(self) -> None:
-        self.population_size = 10
-        self.mutation_rate = 0.5
-
-        self.n_cycles = 100
-
 def main():
-    problem_name = 'p01' 
-    problem_dir = 'data\p01'
     config = OmegaConf.load('configs\ga.yaml')
 
     problem = BinaryKnapsackProblem(config.problem.problem_name, config.problem.problem_dir)
@@ -30,10 +21,17 @@ def main():
 
     results_dir = f'results/{config.problem.problem_name}_{config.problem.algorithm}'
     os.makedirs(results_dir, exist_ok=True)
+    os.makedirs(f'{results_dir}/plots', exist_ok=True)
 
     run_ga(problem, config, logger)
 
     logger.write_csv(f'{results_dir}/result.csv')
+    logger.write_best_stats(f'{results_dir}/best.txt')
+
+    plot_run(logger.best_value_of_cycle[1:], 'best value of cycle', f'{results_dir}/plots/best_value_of_cycle.png')
+    plot_run(logger.avg_value_of_cycle[1:], 'average value of cycle', f'{results_dir}/plots/avg_value_of_cycle.png')
+
+
 
 
 

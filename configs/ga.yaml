@@ -1,3 +1,10 @@
-population_size: 8
-mutation_rate: 0.5
-generations: 100_000
+problem:
+  problem_name: 'p08' 
+  problem_dir: 'data\p08'
+  algorithm: 'ga'
+
+ga:
+  population_size: 8
+  mutation_rate: 0.1
+  generations: 10_000
+  elites: 1

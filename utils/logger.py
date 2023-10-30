@@ -13,7 +13,25 @@ class LoggerCSV():
         self.weight_of_best = [0]
         self.solution_of_best = [np.zeros(len(problem.profits))]
 
+        self.solution = problem.solution
+
         self.cycle_count = 0
+        
+        self.best_value = 0
+        self.best_value_cycle = 0
+        self.best_solution = []
+        self.best_closeness = len(self.solution)
+
+
+    def get_solution_closeness(self, solution: np.ndarray):
+        count = 0
+        for i in range(len(self.solution)):
+            if solution[i] == self.solution[i]:
+                count += 1
+
+        closeness = len(solution) - count
+
+        return closeness
     
     # NOTE: make common class for individual and Ants
     def update_cycle(self, population: list):
@@ -28,6 +46,12 @@ class LoggerCSV():
         best_idx = np.argmax(population_fitnesses)
 
         self.solution_of_best.append(population[best_idx].genome)
+
+        if best > self.best_value:
+            self.best_value = best
+            self.best_value_cycle = self.cycle_count
+            self.best_solution = population[best_idx].genome
+            self.best_closeness = self.get_solution_closeness(self.best_solution)
 
         self.cycle_count += 1
     
@@ -45,3 +69,8 @@ class LoggerCSV():
         )
 
         df.to_csv(f'{path}', index=True)
+
+    def write_best_stats(self, path: str):
+        with open(path, 'w') as file:
+            file.write('cycle,best_value,solution,closeness\n')
+            file.write(f'{self.best_value},{self.best_value_cycle},{self.best_solution},{self.best_closeness}')
