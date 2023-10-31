@@ -33,8 +33,6 @@ def main():
 
     run_func(problem, config, logger)
 
-    return
-
     logger.write_csv(f'{results_dir}/result.csv')
     logger.write_best_stats(f'{results_dir}/best.txt')
 

@@ -5,7 +5,7 @@ problem:
 
 aco:
   population_size: 8
-  generations: 10_000
+  generations: 100
   rho: 0.93 # evaporation rate
   alpha: 1 # important factor of alpha
   beta: 1 # imporatant factor of attractiveness
