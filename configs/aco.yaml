@@ -1,0 +1,11 @@
+problem:
+  problem_name: 'p01' 
+  problem_dir: 'data\p01'
+  algorithm: 'aco'
+
+aco:
+  population_size: 8
+  generations: 10_000
+  rho: 0.93 # evaporation rate
+  alpha: 1 # important factor of alpha
+  beta: 1 # imporatant factor of attractiveness
