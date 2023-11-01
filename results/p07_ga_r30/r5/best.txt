@@ -1,0 +1,2 @@
+cycle,best_value,solution,closeness
+719,1456,[0 1 1 1 0 0 1 1 1 0 0 0 0 1 1],4
