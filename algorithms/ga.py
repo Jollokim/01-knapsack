@@ -1,8 +1,5 @@
 import numpy as np
-from numba import njit, int32
-from numba.experimental import jitclass
 
-from numba.typed import List
 from utils import BinaryKnapsackProblem, solutions_same
 from utils import LoggerCSV
 
@@ -50,13 +47,7 @@ def run_ga(problem: BinaryKnapsackProblem, config, logger: LoggerCSV):
     print([individual.genome for individual in population])
 
 
-specs = [
-    ('genome', int32[:]),
-    ('fitness', int32)
-]
 
-
-@jitclass(specs)
 class Individual():
     def __init__(self, geno_size: int) -> None:
         self.genome = np.zeros(geno_size, dtype=np.int32)
@@ -73,9 +64,8 @@ class Individual():
         return f'{self.genome}, fitness:{self.fitness}'
 
 
-@njit
 def init_population(population_size: int, geno_size: int) -> list[Individual]:
-    population = List()
+    population = []
 
     for i in range(population_size):
         individual = Individual(geno_size)
@@ -86,19 +76,16 @@ def init_population(population_size: int, geno_size: int) -> list[Individual]:
     return population
 
 
-@njit
 def fitness_f(individual: Individual, item_profits: np.array) -> int:
     fitness = np.sum(individual.genome * item_profits)
     return fitness
 
 
-@njit
 def weight_f(individual: Individual, item_weights: np.array) -> int:
     weight = fitness_f(individual, item_weights)
     return weight
 
 
-@njit
 def update_population_fitness(population: list[Individual], item_profits: np.array):
     for i in range(len(population)):
         fitness = fitness_f(population[i], item_profits)
@@ -106,7 +93,6 @@ def update_population_fitness(population: list[Individual], item_profits: np.arr
         population[i].update_fitness(fitness)
 
 
-@njit
 def total_population_fitness(population: list[Individual]) -> int:
     total_fitness = 0
 
@@ -116,7 +102,6 @@ def total_population_fitness(population: list[Individual]) -> int:
     return total_fitness
 
 
-@njit
 def roulette_wheel_probabilities(population: list[Individual], population_fitness: int) -> list[float]:
     probabilities = []
 
@@ -127,7 +112,6 @@ def roulette_wheel_probabilities(population: list[Individual], population_fitnes
     return probabilities
 
 
-# @njit
 def select_parents_roulette_wheel(population: list[Individual], elites: int=0) -> list[Individual]:
     population_fitness = total_population_fitness(population)
 
@@ -149,7 +133,6 @@ def select_parents_roulette_wheel(population: list[Individual], elites: int=0) -
     return parents
 
 
-@njit
 def random_int_from_to(min: int, max: int):
     # drawing a random point in interval [min , max) and flooring it to get index
     point = int(np.floor((np.random.random() * (max-min)) + min))
@@ -157,7 +140,6 @@ def random_int_from_to(min: int, max: int):
     return point
 
 
-@njit
 def single_point_crossover(parent1: Individual, parent2: Individual) -> list[Individual]:
 
     point = random_int_from_to(1, len(parent1.genome)-1)
@@ -177,14 +159,13 @@ def single_point_crossover(parent1: Individual, parent2: Individual) -> list[Ind
     child2.genome[:point] = genome_p2_1
     child2.genome[point:] = genome_p1_2
 
-    children = List([child1, child2])
+    children = [child1, child2]
 
     return children
 
 
-# @njit
 def crossover_parents(parents: list[Individual]) -> list[Individual]:
-    children = List()
+    children = []
 
     # create pairs
     for i in range(1, len(parents), 2):
@@ -197,9 +178,8 @@ def crossover_parents(parents: list[Individual]) -> list[Individual]:
     return children
 
 
-# @njit
 def concat_parents_children(parents: list[Individual], children: list[Individual]) -> list[Individual]:
-    population = List()
+    population = []
 
     for i in range(len(parents)):
         population.append(parents[i])
@@ -210,7 +190,6 @@ def concat_parents_children(parents: list[Individual], children: list[Individual
     return population
 
 
-@njit
 def mutate_population(population: list[Individual], mutation_rate: int = 0.5):
     for individual in population:
         for i in range(len(individual.genome)):
@@ -225,7 +204,6 @@ def mutate_population(population: list[Individual], mutation_rate: int = 0.5):
                 continue
 
 
-@njit
 def unflip_to_fit_restraint(population: list[Individual], item_weights: np.array, restraint: int):
     for individual in population:
         ones_idx = []
@@ -241,6 +219,3 @@ def unflip_to_fit_restraint(population: list[Individual], item_weights: np.array
 
             del ones_idx[random_index]
 
-
-# if __name__ == '__main__':
-#     run_ga()

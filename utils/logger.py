@@ -75,4 +75,4 @@ class LoggerCSV():
     def write_best_stats(self, path: str):
         with open(path, 'w') as file:
             file.write('cycle,best_value,solution,closeness\n')
-            file.write(f'{self.best_value},{self.best_value_cycle},{self.best_solution},{self.best_closeness}')
+            file.write(f'{self.best_value_cycle},{self.best_value},{self.best_solution},{self.best_closeness}')

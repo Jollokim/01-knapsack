@@ -8,7 +8,7 @@ algorithm_function = {'ga': run_ga, 'aco': run_aco}
 
 
 def main():
-    config = OmegaConf.load('configs/aco.yaml')
+    config = OmegaConf.load('configs/ga.yaml')
 
     problem = BinaryKnapsackProblem(
         config.problem.problem_name, config.problem.problem_dir)
@@ -32,6 +32,8 @@ def main():
     run_func = algorithm_function[config.problem.algorithm]
 
     run_func(problem, config, logger)
+
+    print(problem.solution)
 
     logger.write_csv(f'{results_dir}/result.csv')
     logger.write_best_stats(f'{results_dir}/best.txt')

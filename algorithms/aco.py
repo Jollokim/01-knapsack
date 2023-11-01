@@ -1,5 +1,4 @@
 from utils import BinaryKnapsackProblem, LoggerCSV
-from numba.typed import List
 import numpy as np
 from utils import solutions_same
 
@@ -12,18 +11,15 @@ def run_aco(problem: BinaryKnapsackProblem, config, logger: LoggerCSV):
             not solutions_same(logger.solution_of_best[len(logger.solution_of_best)-1], problem.solution):
         reset_all_ants(ants_population)
         
-        ants_walk(ants_population, item_lst, problem.capacity)
+        ants_walk(ants_population, item_lst, problem.capacity, alpha=config.aco.alpha, beta=config.aco.beta)
 
-        # print([item.pheromones for item in item_lst])
         update_pheromones(ants_population, item_lst,
                           problem.profits, config.aco.rho)
-        # print([item.pheromones for item in item_lst])
-
-        print([ant.genome for ant in ants_population])
 
         update_fitness(ants_population)
         logger.update_cycle(ants_population)
         logger.print_cycle_stats()
+
 
 
 class Item:
@@ -31,7 +27,7 @@ class Item:
         self.value = value
         self.weight = weight
 
-        self.attractiveness = value / (weight)**2
+        self.attractiveness = value / ((weight)**2)
 
         self.pheromones = np.ones(n_items)
 
@@ -80,7 +76,7 @@ def reset_all_ants(ants_population: list[Ant]):
 
 def init_items(problem: BinaryKnapsackProblem) -> list[Item]:
 
-    item_lst = []  # List()
+    item_lst = []
 
     for i in range(len(problem.profits)):
         item = Item(problem.profits[i],
@@ -91,7 +87,7 @@ def init_items(problem: BinaryKnapsackProblem) -> list[Item]:
 
 
 def init_ants(problem: BinaryKnapsackProblem, population_size: int):
-    ants_population = []  # List()
+    ants_population = [] 
 
     for i in range(population_size):
         ant = Ant(len(problem.profits))
@@ -99,76 +95,66 @@ def init_ants(problem: BinaryKnapsackProblem, population_size: int):
 
     return ants_population
 
-
-def ants_walk(ants_population: list[Ant], item_lst: list[Item], capacity: int):
+def ants_walk(ants_population: list[Ant], item_lst: list[Item], capacity: int, alpha: float, beta: float):
     for ant in ants_population:
-        walk(ant, item_lst, capacity)
+        walk(ant, item_lst, capacity, alpha, beta)
 
 
-def walk(ant: Ant, item_lst: list[Item], capacity: int):
+def walk(ant: Ant, item_lst: list[Item], capacity: int, alpha, beta):
     ant_capacity = ant.get_carry_weight()
-    pool_idx = create_item_pool(ant, ant_capacity, item_lst)
-    # print(ant_capacity)
-    # print(ant.genome)
-    # print('pool of indexes to pick from', pool_idx)
+    pool_idx = create_item_pool(ant, ant_capacity, item_lst, capacity)
 
     last_item = None
 
     while len(pool_idx) > 0:
 
-        pool_idx_probs = selection_probabilities(pool_idx, item_lst, last_item)
-        # print('pool of indexes to pick from', pool_idx)
+        pool_idx_probs = selection_probabilities(pool_idx, item_lst, last_item, alpha, beta)
 
         selected_idx = np.random.choice(pool_idx, 1, p=pool_idx_probs)
 
         ant.pick_up_item(selected_idx[0], item_lst[selected_idx[0]])
         last_item = ant.items_picked[-1]
 
-        # print()
-        # print(pool_idx)
-        # print([item_lst[i].attractiveness for i in pool_idx])
-        # print([item_lst[i].pheromones[i] for i in pool_idx])
-        # print(pool_idx_probs)
-        # print()
-
         ant_capacity = ant.get_carry_weight()
-        pool_idx = create_item_pool(ant, ant_capacity, item_lst)
+        pool_idx = create_item_pool(ant, ant_capacity, item_lst, capacity)
 
 
-def create_item_pool(ant: Ant, ant_capacity: int, item_lst: list[Item]):
+def create_item_pool(ant: Ant, ant_capacity: int, item_lst: list[Item], max_capacity):
     pool_idx = []
 
     for i in range(len(item_lst)):
-        if (item_lst[i] not in ant.items_picked) and (item_lst[i].weight > ant_capacity):
+        if (item_lst[i] not in ant.items_picked) and ((item_lst[i].weight+ant_capacity) <= max_capacity):
             pool_idx.append(i)
 
     return pool_idx
 
 
-def selection_probabilities(pool_idx: list[int], item_lst: list[Item], last_item: Item = None):
+def selection_probabilities(pool_idx: list[int], item_lst: list[Item], last_item: Item = None, alpha: int=1, beta: int=1):
     probabilities = []
     sum_attract_phero = sum_for_selection_probabilities(
-        pool_idx, item_lst, last_item)
+        pool_idx, item_lst, last_item, alpha, beta)
 
     for idx in pool_idx:
+        
         if last_item is None:
-            p = (item_lst[idx].attractiveness * item_lst[idx].pheromones[idx]) / sum_attract_phero
+            p = ((item_lst[idx].attractiveness**beta) * (item_lst[idx].pheromones[idx]**alpha)) / sum_attract_phero
+
         else:
-            p = (item_lst[idx].attractiveness * last_item.pheromones[idx]) / sum_attract_phero
+            p = ((item_lst[idx].attractiveness**beta) * (last_item.pheromones[idx]**alpha)) / sum_attract_phero
 
         probabilities.append(p)
 
     return probabilities
 
 
-def sum_for_selection_probabilities(pool_idx: list[int], item_lst: list[Item], last_item: Item = None):
+def sum_for_selection_probabilities(pool_idx: list[int], item_lst: list[Item], last_item: Item = None, alpha: int=1, beta: int=1):
     s = 0
 
     for idx in pool_idx:
         if last_item is None:
-            s += item_lst[idx].attractiveness*item_lst[idx].pheromones[idx]
+            s += (item_lst[idx].attractiveness**beta)*(item_lst[idx].pheromones[idx]**alpha)
         else:
-            s += item_lst[idx].attractiveness*last_item.pheromones[idx]
+            s += (item_lst[idx].attractiveness**beta)*(last_item.pheromones[idx]**alpha)
 
     return s
 
@@ -181,7 +167,6 @@ def update_pheromones(ants_population: list[Ant], item_lst: list[Item], profits:
         ants_value.append(value)
 
     best_value = np.max(ants_value)
-    best_value_idx = np.argmax(ants_value)
 
     for i in range(len(ants_population)):
         update_from_solution(
@@ -196,8 +181,6 @@ def update_from_solution(ant: Ant, item_lst: list[Item], ant_value: int, best_va
     for i in range(len(ant.items_picked)):
         if prev_idx is None:
             item_idx = item_lst.index(ant.items_picked[i])
-            print('best_value:', best_value, 'ant_value:', ant_value)
-            print('pheromone placed', 1 / (1 + ((best_value - ant_value) / best_value)))
             ant.items_picked[i].pheromones[item_idx] += 1 / (1 + ((best_value - ant_value) / best_value))
             prev_idx = item_idx
         else:
