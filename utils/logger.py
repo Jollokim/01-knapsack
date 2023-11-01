@@ -74,8 +74,8 @@ class LoggerCSV():
         print('Cycle:', len(self.best_value_of_cycle)-1)
         print('Best value:', self.best_value_of_cycle[len(self.best_value_of_cycle)-1])
         print('Mean value:', self.avg_value_of_cycle[len(self.best_value_of_cycle)-1])
-        print('Best solution;', self.best_solution)
-        print()
+        print('Best solution:')
+        print(self.best_solution)
 
     def write_csv(self, path: str):
         df = pd.DataFrame(

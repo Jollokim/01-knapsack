@@ -1,6 +1,6 @@
 problem:
-  problem_name: 'p08' 
-  problem_dir: 'data\p08'
+  problem_name: 'p01' 
+  problem_dir: 'data\p01'
   algorithm: 'ga'
 
 ga:
@@ -9,4 +9,4 @@ ga:
   generations: 10_000
   elites: 1
 
-multi_run: 1
+multi_run: 30

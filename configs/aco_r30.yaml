@@ -1,6 +1,6 @@
 problem:
-  problem_name: 'p08' 
-  problem_dir: 'data\p08'
+  problem_name: 'p01' 
+  problem_dir: 'data\p01'
   algorithm: 'aco'
 
 aco:
@@ -10,4 +10,4 @@ aco:
   alpha: 0.8 # important factor of alpha
   beta: 1 # imporatant factor of attractiveness
 
-multi_run: 1
+multi_run: 30

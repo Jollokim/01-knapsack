@@ -24,27 +24,34 @@ def main(args):
     print('Optimal profit:')
     print(problem.optimal_profit)
 
+    if config.multi_run > 1:
+        results_dirs = [f'results/{config.problem.problem_name}_{config.problem.algorithm}_r{config.multi_run}/r{i}' for i in range(config.multi_run)]
+        for results_dir in results_dirs:
+            os.makedirs(results_dir, exist_ok=True)
+            os.makedirs(f'{results_dir}/plots', exist_ok=True)
+    else:
+        results_dir = f'results/{config.problem.problem_name}_{config.problem.algorithm}'
+        os.makedirs(results_dir, exist_ok=True)
+        os.makedirs(f'{results_dir}/plots', exist_ok=True)
+        results_dirs = [results_dir]
     
+    
+    for i in range(config.multi_run):
+        logger = LoggerCSV(problem)
 
-    logger = LoggerCSV(problem)
+        run_func = algorithm_function[config.problem.algorithm]
 
-    results_dir = f'results/{config.problem.problem_name}_{config.problem.algorithm}'
-    os.makedirs(results_dir, exist_ok=True)
-    os.makedirs(f'{results_dir}/plots', exist_ok=True)
+        run_func(problem, config, logger)
 
-    run_func = algorithm_function[config.problem.algorithm]
+        print(problem.solution)
 
-    run_func(problem, config, logger)
+        logger.write_csv(f'{results_dirs[i]}/result.csv')
+        logger.write_best_stats(f'{results_dirs[i]}/best.txt')
 
-    print(problem.solution)
-
-    logger.write_csv(f'{results_dir}/result.csv')
-    logger.write_best_stats(f'{results_dir}/best.txt')
-
-    plot_run(logger.best_value_of_cycle[1:], 'best value of cycle',
-             f'{results_dir}/plots/best_value_of_cycle.png')
-    plot_run(logger.avg_value_of_cycle[1:], 'average value of cycle',
-             f'{results_dir}/plots/avg_value_of_cycle.png')
+        plot_run(logger.best_value_of_cycle[1:], 'best value of cycle',
+                f'{results_dirs[i]}/plots/best_value_of_cycle.png')
+        plot_run(logger.avg_value_of_cycle[1:], 'average value of cycle',
+                f'{results_dirs[i]}/plots/avg_value_of_cycle.png')
 
 
 def args_parser():

@@ -12,3 +12,5 @@ def plot_run(data: np.ndarray, y_label: str, save_path: str=None):
         plt.savefig(save_path)
     else:
         plt.show()
+
+    plt.close()
