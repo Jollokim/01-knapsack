@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from utils import BinaryKnapsackProblem
+from time import time
 
 
 class LoggerCSV():
@@ -16,12 +17,26 @@ class LoggerCSV():
         self.solution = problem.solution
 
         self.cycle_count = 0
+
+        self.cycle_time = [0]
+        self.timing_start = 0
+
         
         self.best_value = 0
         self.best_value_cycle = 0
         self.best_solution = []
         self.best_closeness = len(self.solution)
 
+
+    def start_cycle_timing(self):
+        self.timing_start = time()
+
+    def end_cycle_timing(self):
+        end = time()
+
+        time_taken = (end - self.timing_start) * 1000
+
+        self.cycle_time.append(time_taken)
 
     def get_solution_closeness(self, solution: np.ndarray):
         count = 0
@@ -66,7 +81,8 @@ class LoggerCSV():
         df = pd.DataFrame(
             {
                 'best': self.best_value_of_cycle,
-                'avg': self.avg_value_of_cycle
+                'avg': self.avg_value_of_cycle,
+                'cycle_time(ms)': self.cycle_time
             }
         )
 

@@ -2,13 +2,14 @@ from utils import BinaryKnapsackProblem, LoggerCSV, plot_run
 from algorithms import run_ga, run_aco
 from omegaconf import OmegaConf
 import os
+import argparse
 
 
 algorithm_function = {'ga': run_ga, 'aco': run_aco}
 
 
-def main():
-    config = OmegaConf.load('configs/ga.yaml')
+def main(args):
+    config = OmegaConf.load(args.config_file)
 
     problem = BinaryKnapsackProblem(
         config.problem.problem_name, config.problem.problem_dir)
@@ -22,6 +23,8 @@ def main():
     print(problem.solution)
     print('Optimal profit:')
     print(problem.optimal_profit)
+
+    
 
     logger = LoggerCSV(problem)
 
@@ -44,5 +47,19 @@ def main():
              f'{results_dir}/plots/avg_value_of_cycle.png')
 
 
+def args_parser():
+    parser = argparse.ArgumentParser(
+        prog='Evolutionary algorithms for binary knapsack problem',
+        description='Uses ga or aco to find best solution for binary knapsack problem'
+                                     )
+    
+    parser.add_argument('--config_file', type=str, required=True)
+
+    args = parser.parse_args()
+
+    return args
+
+
 if __name__ == '__main__':
-    main()
+    args = args_parser()
+    main(args)

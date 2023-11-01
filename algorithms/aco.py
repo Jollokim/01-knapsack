@@ -8,7 +8,9 @@ def run_aco(problem: BinaryKnapsackProblem, config, logger: LoggerCSV):
     item_lst = init_items(problem)
 
     while config.aco.generations != logger.cycle_count and \
-            not solutions_same(logger.solution_of_best[len(logger.solution_of_best)-1], problem.solution):
+        not solutions_same(logger.solution_of_best[len(logger.solution_of_best)-1], problem.solution):
+        
+        logger.start_cycle_timing()
         reset_all_ants(ants_population)
         
         ants_walk(ants_population, item_lst, problem.capacity, alpha=config.aco.alpha, beta=config.aco.beta)
@@ -17,6 +19,8 @@ def run_aco(problem: BinaryKnapsackProblem, config, logger: LoggerCSV):
                           problem.profits, config.aco.rho)
 
         update_fitness(ants_population)
+        
+        logger.end_cycle_timing()
         logger.update_cycle(ants_population)
         logger.print_cycle_stats()
 

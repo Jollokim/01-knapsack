@@ -19,6 +19,7 @@ def run_ga(problem: BinaryKnapsackProblem, config, logger: LoggerCSV):
     while config.ga.generations != logger.cycle_count and \
         not solutions_same(logger.solution_of_best[len(logger.solution_of_best)-1], problem.solution):
 
+        logger.start_cycle_timing()
         # select parent
         parents = select_parents_roulette_wheel(population, elites=config.ga.elites)
         # print([parent.genome for parent in parents])
@@ -38,6 +39,7 @@ def run_ga(problem: BinaryKnapsackProblem, config, logger: LoggerCSV):
         # update fitness on all individuals
         update_population_fitness(population, item_profits)
 
+        logger.end_cycle_timing()
         logger.update_cycle(population)
         logger.print_cycle_stats()
 
