@@ -11,6 +11,8 @@ def run_aco(problem: BinaryKnapsackProblem, config, logger: LoggerCSV):
         not solutions_same(logger.solution_of_best[len(logger.solution_of_best)-1], problem.solution):
         
         logger.start_cycle_timing()
+        
+        # reset ants solutions
         reset_all_ants(ants_population)
         
         ants_walk(ants_population, item_lst, problem.capacity, alpha=config.aco.alpha, beta=config.aco.beta)
