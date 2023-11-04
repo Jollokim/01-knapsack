@@ -1,6 +1,6 @@
 problem:
-  problem_name: 'p08' 
-  problem_dir: 'data\p08'
+  problem_name: 'p01' 
+  problem_dir: 'data\p01'
   algorithm: 'aco'
 
 aco:
